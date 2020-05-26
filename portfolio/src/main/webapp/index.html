@@ -1,18 +1,52 @@
 <!DOCTYPE html>
 <html>
+
   <head>
     <meta charset="UTF-8">
     <title>My Portfolio</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
+
   <body>
     <div id="content">
-      <h1>My Portfolio</h1>
-      <p>This is my portfolio.</p>
-      <p>Click here to get a random message:</p>
+      <h1 id="header" onclick="applyColor()">Payton Dennis's Portfolio</h1> 
+      <i>Click the above heading for a surpise!</i>
+
+      <p>Hi! Welcome to my portfolio.</p>
+
+      <p><i>Fun Fact: </i>HTML is a text markup language not a programming language!</p>
+
+      <p>I'm starting a programming blog and a coding YouTube channel soon. I'm going to be fully immersed in the programming world soon.</p>
+
+
+        Projects I have worked on:
+      <ul> 
+          <li>React Projects</li>
+          <li>Portfolio</li>
+          <li>Data Structures + Algorithms</li>
+          <li>Coding Interviews + Problem Solving</li>
+          <li>STEP (EP) Internship Project 2019</li>
+          <li>And hopefully many more to come...</li>
+      </ul>
+
+      <p>Click here to get a random 'Hello World' message:</p>
       <button onclick="addRandomGreeting()">Hello</button>
       <div id="greeting-container"></div>
+
+      <hr>
+
+      <img src="./images/deno.png" alt="Deno logo">
+
+      <hr>
+
+      <footer class="footer">
+          <a href="./about.html">About Me</a>
+          <a href="https://github.com/JabariD">GitHub</a>
+          <a href="https://www.linkedin.com/in/payton-d-78a7a2171/">LinkedIn</a>
+      </footer>
+
     </div>
   </body>
+
 </html>
