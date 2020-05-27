@@ -8,4 +8,13 @@
   margin-top: 20px;
 }
 
+.list-box-model-test {
+    width: 300px;
+    border: 2px dashed black;
+    padding: 25px;
+    margin: 10px;
+}
 
+body {
+    font-family: 'Courier New', Courier, monospace;
+}
