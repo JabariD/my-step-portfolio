@@ -9,20 +9,25 @@
   </head>
 
   <body>
-    <div id="content">
-      <h1 id="header" onclick="applyColor()">Payton Dennis's Portfolio</h1> 
-      <strong><i>(Click the above heading for a surpise!!)</i></strong>
+      <div id="content">
+    
+        <h1 id="header" onclick="applyColor()">Payton Dennis's Portfolio</h1> 
+        <strong><i>(Click the above heading for a surpise!!)</i></strong>
 
-      <p>Hi! Welcome to my portfolio.</p>
+        <p>Hi! Welcome to my portfolio.</p>
 
-      <p><i>Fun Fact: </i>HTML is a text markup language not a programming language!</p>
+        <p><i>Fun Fact: </i>HTML is a text markup language not a programming language!</p>
 
-      <p>I'm starting a programming blog and a coding YouTube channel soon. I'm going to be fully immersed in the programming world soon.</p>
+        <p>I'm starting a programming blog and a coding YouTube channel soon. I'm going to be fully immersed in the programming world soon.</p>
 
-      <form action="/data" method="GET">
-          <input type="text" name="text"><br><br>
-          <input type="submit">
-      </form>
+    
+      <div class="form-1">
+        Enter any text:
+        <form action="/data" method="GET">
+            <input type="text" name="text"><br><br>
+            <input type="submit" value="Click Me!">
+        </form>
+      </div>
 
 
       <ul class="list-box-model-test"> 
@@ -37,7 +42,8 @@
 
       <p>Click here to get a random 'Hello World' message:</p>
       <button onclick="addRandomGreeting()">Hello</button>
-      <div id="greeting-container"></div>
+      <div id="greeting-container">    
+      </div>
 
       <hr>
 

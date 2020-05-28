@@ -1,3 +1,7 @@
+body {
+    font-family: 'Courier New', Courier, monospace;
+}
+
 #content {
   margin-left: auto;
   margin-right: auto;
@@ -12,10 +16,12 @@
     width: 300px;
     border: 2px dashed black;
     padding: 25px;
-    margin: 10px;
+    margin: 5px;
 }
 
-body {
-    font-family: 'Courier New', Courier, monospace;
-    
+.form-1 {
+    width: 1000px;
+    border: 2px dashed black;
+    padding: 10px;
+    margin: 5px;
 }
