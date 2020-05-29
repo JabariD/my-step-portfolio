@@ -41,11 +41,16 @@ public class DataServlet extends HttpServlet {
     // if (request.getParameter("text") != null)
     //     response.getWriter().println("<p>Your input: " + request.getParameter("text") + "</p>");
 
+    // reset comments. if this wasn't here we would keep appending to comments!
+    comments.clear();
+
     String commentsInJSON = getComments(comments);
 
     // Send JSON as the response
     response.setContentType("application/json;");
     response.getWriter().println(commentsInJSON);
+
+    /* NOTE: This returns double currently because we perform 2 calls to /data */
   }
 
   /**

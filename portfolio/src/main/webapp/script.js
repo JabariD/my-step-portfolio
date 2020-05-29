@@ -46,9 +46,13 @@ function applyColor() {
  */
 async function responseFromServer() {
     const response = await fetch('/data');
+    /* Not needed because we are returning JSON */
     //const text = await response.text();
     const JSONtext = await response.json();
     console.log(JSONtext);
-    document.getElementById('form-response-1').innerText = JSONtext[0]; // text: text or JSON: JSONtext
+
+    // This is extra: We simply add a endline to each comment in the array.
+    comments = JSONtext.map( (comment) => comment + "\n");
+    document.getElementById('form-response-1').innerText = comments; // text: text or JSON: JSONtext
 
 }
