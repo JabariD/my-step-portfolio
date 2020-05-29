@@ -40,3 +40,10 @@ function applyColor() {
     // Add it to the page.
     document.getElementById("header").style.color = color;
 }
+
+async function responseFromServer() {
+    const response = await fetch('/data');
+    const text = await response.text();
+    document.getElementById('form-response-1').innerText = text;
+
+}

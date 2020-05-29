@@ -22,12 +22,15 @@
 
     
       <div class="form-1">
-        Enter any text:
+        Enter any text and click the button:
         <form action="/data" method="GET">
             <input type="text" name="text"><br><br>
             <input type="submit" value="Click Me!">
         </form>
       </div>
+
+      <input onclick="responseFromServer()" type="submit" value="Testing Async!">
+      <div id="form-response-1"></div>
 
 
       <ul class="list-box-model-test"> 
