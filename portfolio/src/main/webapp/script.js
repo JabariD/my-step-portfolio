@@ -41,9 +41,14 @@ function applyColor() {
     document.getElementById("header").style.color = color;
 }
 
+/**
+ * Async Function that fetches the data URL mapped by the server and prints it to console and gets the first element and prints it on form.
+ */
 async function responseFromServer() {
     const response = await fetch('/data');
-    const text = await response.text();
-    document.getElementById('form-response-1').innerText = text;
+    //const text = await response.text();
+    const JSONtext = await response.json();
+    console.log(JSONtext);
+    document.getElementById('form-response-1').innerText = JSONtext[0]; // text: text or JSON: JSONtext
 
 }
