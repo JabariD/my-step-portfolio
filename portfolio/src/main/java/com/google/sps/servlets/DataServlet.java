@@ -20,13 +20,50 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/* Additons */
+import com.google.gson.Gson;
+import java.util.ArrayList;
+/* -------- */
+
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
+  private ArrayList<String> comments = new ArrayList<String>();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    response.setContentType("text/html;");
-    response.getWriter().println("<h1>Hello world!</h1>");
+    /* Returned for FORM submit button */
+    // response.setContentType("text/html;");
+    // response.getWriter().println("<h1>Hello world!</h1>");
+    // response.getWriter().println("<p>You just sent a request to the server and the server responded with this response!</p>");
+
+    /* Check if null for ASYNC button */
+    // if (request.getParameter("text") != null)
+    //     response.getWriter().println("<p>Your input: " + request.getParameter("text") + "</p>");
+
+    // reset comments. if this wasn't here we would keep appending to comments!
+    comments.clear();
+
+    String commentsInJSON = getComments(comments);
+
+    // Send JSON as the response
+    response.setContentType("application/json;");
+    response.getWriter().println(commentsInJSON);
+
+    /* NOTE: This returns double currently because we perform 2 calls to /data */
+  }
+
+  /**
+  *  Converts Obect to JSON to return comments in JSON!
+  **/
+  private String getComments(ArrayList<String> comments) {
+    // Converts Java object to JSON to return comments!
+    comments.add("This site is cool!");
+    comments.add("This site is pretty nice!");
+    comments.add("Eh, this site could use some work.");
+
+    Gson gson = new Gson();
+    String json = gson.toJson(comments);
+    return json;
   }
 }

@@ -17,7 +17,7 @@
  */
 function addRandomGreeting() {
   const greetings =
-      ['Hello world!', '¡Hola Mundo!', '你好，世界！', 'Bonjour le monde!'];
+      ['Hello world!', '¡Hola Mundo!', '你好，世界！', 'Bonjour le monde!', 'Привет мир!', 'Hello Wêreld!'];
 
   // Pick a random greeting.
   const greeting = greetings[Math.floor(Math.random() * greetings.length)];
@@ -25,4 +25,34 @@ function addRandomGreeting() {
   // Add it to the page.
   const greetingContainer = document.getElementById('greeting-container');
   greetingContainer.innerText = greeting;
+}
+
+/**
+ * Changes color of the ONLY the main header on the page.
+ */
+function applyColor() {
+    const colors =
+      ['red', 'green', 'blue', 'yellow', 'black', 'purple', 'orange', 'pink', 'gray', 'aqua', 'tomato', 'teal'];
+    
+    // Pick a random color.
+    const color = colors[Math.floor(Math.random() * colors.length)];
+
+    // Add it to the page.
+    document.getElementById("header").style.color = color;
+}
+
+/**
+ * Async Function that fetches the data URL mapped by the server and prints it to console and gets the first element and prints it on form.
+ */
+async function responseFromServer() {
+    const response = await fetch('/data');
+    /* Not needed because we are returning JSON */
+    //const text = await response.text();
+    const JSONtext = await response.json();
+    console.log(JSONtext);
+
+    // This is extra: We simply add a endline to each comment in the array.
+    comments = JSONtext.map( (comment) => comment + "\n");
+    document.getElementById('form-response-1').innerText = comments; // text: text or JSON: JSONtext
+
 }

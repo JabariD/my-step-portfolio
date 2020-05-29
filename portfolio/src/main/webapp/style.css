@@ -1,9 +1,31 @@
+html {
+    background-color: gainsboro;
+}
+
+body {
+    font-family: 'Courier New', Courier, monospace;
+}
+
 #content {
-  margin-left: auto;
-  margin-right: auto;
-  width: 650px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 650px;
 }
 
 #greeting-container {
   margin-top: 20px;
+}
+
+.list-box-model-test {
+    width: 300px;
+    border: 2px dashed black;
+    padding: 25px;
+    margin: 5px;
+}
+
+.form-1 {
+    width: 300px;
+    border: 2px dashed black;
+    padding: 10px;
+    margin: 5px;
 }
