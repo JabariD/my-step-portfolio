@@ -25,6 +25,12 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 /* -------- */
 
+/* Datastore */
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+/* -------- */
+
 /** Servlet that returns some example content. */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
@@ -35,21 +41,10 @@ public class DataServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    /* Returned for FORM submit button */
-    // response.setContentType("text/html;");
-    // response.getWriter().println("<h1>Hello world!</h1>");
-    // response.getWriter().println("<p>You just sent a request to the server and the server responded with this response!</p>");
-
-    /* Check if null for ASYNC button */
-    // if (request.getParameter("text") != null)
-    //     response.getWriter().println("<p>Your input: " + request.getParameter("text") + "</p>");
-
     // reset comments. if this wasn't here we would keep appending to comments!
     comments.clear();
 
     String commentsInJSON = getComments(comments);
-
-    //response.getWriter().println(commentsInJSON);
 
     // Send JSON as the response
     response.setContentType("application/json;");
@@ -59,6 +54,7 @@ public class DataServlet extends HttpServlet {
     String json = gson.toJson(todos);
 
     // we can send either 2 things for testing out the functionality: comments or todos
+    // in this instance we are sending todos back to the client
     response.getWriter().println(json);
 
   }
@@ -79,14 +75,27 @@ public class DataServlet extends HttpServlet {
 
   /**
   *  1) The user just clicked submit on form #2. Now the computer comes here to get the current state and reloads the entire page.
-  *  2) Then the JS function transforms the DOM to faciliate those changes. (everytime body loads again)
+  *  2) Then the JS function transforms the DOM to facilitate those changes. (everytime body loads again)
   **/
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Add in DataStore
+        String task = request.getParameter("todo");
+        long timestamp = System.currentTimeMillis();
+
+        Entity taskEntity = new Entity("Task");
+        taskEntity.setProperty("task", task);
+        taskEntity.setProperty("timestamp", timestamp);
+
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        datastore.put(taskEntity);
+
+
+
         // add to our todos
         todos.add(request.getParameter("todo"));
 
-        // Usually will be working with JSON
+        // Usually will be working in JSON. So practice with that
         Gson gson = new Gson();
         String json = gson.toJson(todos);
 
