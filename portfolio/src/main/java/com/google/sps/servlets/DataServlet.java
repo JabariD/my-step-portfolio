@@ -25,10 +25,13 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 /* -------- */
 
-/** Servlet that returns some example content. TODO: modify this file to handle comments data */
+/** Servlet that returns some example content. */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
+  // form 1
   private ArrayList<String> comments = new ArrayList<String>();
+  // form 2
+  private ArrayList<String> todos = new ArrayList<String>();
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -46,11 +49,18 @@ public class DataServlet extends HttpServlet {
 
     String commentsInJSON = getComments(comments);
 
+    //response.getWriter().println(commentsInJSON);
+
     // Send JSON as the response
     response.setContentType("application/json;");
-    response.getWriter().println(commentsInJSON);
 
-    /* NOTE: This returns double currently because we perform 2 calls to /data */
+    // send Todos
+    Gson gson = new Gson();
+    String json = gson.toJson(todos);
+
+    // we can send either 2 things for testing out the functionality: comments or todos
+    response.getWriter().println(json);
+
   }
 
   /**
@@ -66,4 +76,22 @@ public class DataServlet extends HttpServlet {
     String json = gson.toJson(comments);
     return json;
   }
+
+  /**
+  *  1) The user just clicked submit on form #2. Now the computer comes here to get the current state and reloads the entire page.
+  *  2) Then the JS function transforms the DOM to faciliate those changes. (everytime body loads again)
+  **/
+    @Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // add to our todos
+        todos.add(request.getParameter("todo"));
+
+        // Usually will be working with JSON
+        Gson gson = new Gson();
+        String json = gson.toJson(todos);
+
+        response.setContentType("application/json;");
+        response.getWriter().println(json);
+        response.sendRedirect("./index.html"); // redirects to init page load JS function
+    }
 }

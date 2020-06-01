@@ -11,7 +11,8 @@
     <script src="script.js"></script>
   </head>
 
-  <body>
+  <!-- NOTE: Whenever body loads, we will update the STATE of our function. React would be really helpful right now :) -->
+  <body onload="updateTodos()">
       <div id="content">
         <!-- More practice with HTML elements. -->
         <h1 id="header" onclick="applyColor()">Payton Dennis's Portfolio</h1> 
@@ -24,7 +25,7 @@
         <p>I'm starting a programming blog and a coding YouTube channel soon. I'm going to be fully immersed in the programming world soon.</p>
 
     
-      <!-- This practices the FORM functionality to get data from the user. -->
+      <!-- This practices the FORM functionality to GET data from the user. -->
 
       <div class="form-1">
         Enter any text and click the button:
@@ -57,6 +58,7 @@
       <div id="greeting-container">    
       </div>
 
+      <!-- Image -->
       <hr>
 
       <img src="./images/deno.png" alt="Deno logo">
@@ -66,11 +68,12 @@
       <!-- POST functionality. -->
       <form action="/data" method="POST">
         <p>Input a task: </p>
-        <input type="text" name="todo">
-        <input type="submit" />
+        <input type="text" name="todo" id="todo">
+        <input type="submit"/>
       </form>
       
       <!-- Used to append todos to element! -->
+      <p>Todos:</p>
       <ul id="todos"></ul>
 
 
