@@ -54,5 +54,21 @@ async function responseFromServer() {
     // This is extra: We simply add a endline to each comment in the array.
     comments = JSONtext.map( (comment) => comment + "\n");
     document.getElementById('form-response-1').innerText = comments; // text: text or JSON: JSONtext
+}
 
+
+/**
+ * Function that simply fetches the state of the todo array and appends them to unordered list todos.
+ */
+async function updateTodos() {
+    const response = await fetch('/data');
+    const data = await response.json();
+
+    const todos = document.getElementById('todos'); 
+    for (todo of data) {
+        // create li element
+        const liElement = document.createElement('li');
+        liElement.innerText = todo;
+        todos.appendChild(liElement);
+    }
 }
