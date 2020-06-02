@@ -44,24 +44,19 @@ function applyColor() {
 /**
  * Async Function that fetches the data URL mapped by the server and prints it to console and gets the first element and prints it on form.
  */
-async function responseFromServer() {
-    const response = await fetch('/data');
-    /* Not needed because we are returning JSON */
-    //const text = await response.text();
-    const JSONtext = await response.json();
-    console.log(JSONtext);
+async function addFoodToDOM() {
+    const response = await fetch('/addToDOM');
+    const data = await response.json();
 
-    // This is extra: We simply add a endline to each comment in the array.
-    comments = JSONtext.map( (comment) => comment + "\n");
-    document.getElementById('form-response-1').innerText = comments; // text: text or JSON: JSONtext
+    document.getElementById('fooditems').innerText = data + "!"; 
 }
 
 
 /**
- * Function that simply fetches the state of the todo array and appends them to unordered list todos.
+ * Function that fetches the state of the todo array and appends them to unordered list todos.
  */
 async function updateTodos() {
-    const response = await fetch('/data');
+    const response = await fetch('/todo');
     const data = await response.json();
 
     const todos = document.getElementById('todos'); 
@@ -69,6 +64,7 @@ async function updateTodos() {
         // create li element
         const liElement = document.createElement('li');
         liElement.innerText = todo;
+
         todos.appendChild(liElement);
     }
 }

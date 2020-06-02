@@ -31,52 +31,25 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 /* -------- */
 
-/** Servlet that returns some example content. */
-@WebServlet("/data")
-public class DataServlet extends HttpServlet {
-  // form 1
-  private ArrayList<String> comments = new ArrayList<String>();
-  // form 2
+/** Servlet that returns some todo content. */
+@WebServlet("/todo")
+public class TodoServlet extends HttpServlet {
+  
   private ArrayList<String> todos = new ArrayList<String>();
 
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // reset comments. if this wasn't here we would keep appending to comments!
-    comments.clear();
+    @Override
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Send JSON as the response
+        response.setContentType("application/json;");
 
-    String commentsInJSON = getComments(comments);
-
-    // Send JSON as the response
-    response.setContentType("application/json;");
-
-    // send Todos
-    Gson gson = new Gson();
-    String json = gson.toJson(todos);
-
-    // we can send either 2 things for testing out the functionality: comments or todos
-    // in this instance we are sending todos back to the client
-    response.getWriter().println(json);
+        // send Todos
+        Gson gson = new Gson();
+        String json = gson.toJson(todos);
+        
+        // send todos to client
+        response.getWriter().println(json);
 
   }
-
-  /**
-  *  Converts Obect to JSON to return comments in JSON!
-  **/
-  private String getComments(ArrayList<String> comments) {
-    // Converts Java object to JSON to return comments!
-    comments.add("This site is cool!");
-    comments.add("This site is pretty nice!");
-    comments.add("Eh, this site could use some work.");
-
-    Gson gson = new Gson();
-    String json = gson.toJson(comments);
-    return json;
-  }
-
-  /**
-  *  1) The user just clicked submit on form #2. Now the computer comes here to get the current state and reloads the entire page.
-  *  2) Then the JS function transforms the DOM to facilitate those changes. (everytime body loads again)
-  **/
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // Add in DataStore
@@ -95,7 +68,7 @@ public class DataServlet extends HttpServlet {
         // add to our todos
         todos.add(request.getParameter("todo"));
 
-        // Usually will be working in JSON. So practice with that
+        // Most applications send messages using JSON
         Gson gson = new Gson();
         String json = gson.toJson(todos);
 
