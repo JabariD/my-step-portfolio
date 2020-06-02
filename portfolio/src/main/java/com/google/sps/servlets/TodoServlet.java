@@ -29,16 +29,21 @@ import java.util.ArrayList;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
 /* -------- */
 
 /** Servlet that returns some todo content. */
 @WebServlet("/todo")
 public class TodoServlet extends HttpServlet {
-  
-  private ArrayList<String> todos = new ArrayList<String>();
+    private  ArrayList<String> todos = new ArrayList<String>();
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Get Todos from Datastore
+        todos = loadTodos();
+
         // Send JSON as the response
         response.setContentType("application/json;");
 
@@ -48,8 +53,8 @@ public class TodoServlet extends HttpServlet {
         
         // send todos to client
         response.getWriter().println(json);
+    }
 
-  }
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // Add in DataStore
@@ -63,9 +68,7 @@ public class TodoServlet extends HttpServlet {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         datastore.put(taskEntity);
 
-
-
-        // add to our todos
+        // Add to our todos
         todos.add(request.getParameter("todo"));
 
         // Most applications send messages using JSON
@@ -75,5 +78,30 @@ public class TodoServlet extends HttpServlet {
         response.setContentType("application/json;");
         response.getWriter().println(json);
         response.sendRedirect("./index.html"); // redirects to init page load JS function
+    }
+
+    public ArrayList<String> loadTodos() {
+        
+        // create query instance with the 'Task' kind to load it's instances
+        /* NOTE: that addSort is a function that automatically sorts based on the property */
+        Query query = new Query("Task").addSort("timestamp", SortDirection.DESCENDING);
+
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+        // contains all the results of the KIND that you want to receive
+        PreparedQuery results = datastore.prepare(query);
+
+        ArrayList<String> todo = new ArrayList<String>();
+
+        // loop through the entities and put them in todos.
+        for (Entity entity : results.asIterable()) {
+            long id = entity.getKey().getId();
+            String task = (String) entity.getProperty("task");
+            long timestamp = (long) entity.getProperty("timestamp");
+
+            todo.add(task);
+        }
+
+        return todo;
     }
 }
