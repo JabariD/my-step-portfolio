@@ -47,9 +47,15 @@
       <!-- 3) POST functionality. -->
       <h2>Servlet 3: Todos </h2>
       <div class="box">
-        <form action="/data" method="POST">
+        <form action="/todo" method="POST">
             <p>Input a task: </p>
             <input type="text" name="todo" id="todo">
+              <br>
+              <br>
+            <label for="quantity">Display (1-5):</label>
+            <input type="number" id="quantity" name="quantity" min="1" max="5" placeholder="3" onchange="updateTodos()" value="3">
+              <br>
+              <br>
             <input type="submit"/>
         </form>
         

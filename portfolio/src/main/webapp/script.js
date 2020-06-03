@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Adds a random greeting to the page.
- */
+
+/** Adds a random greeting to the page. */
 function addRandomGreeting() {
   const greetings =
       ['Hello world!', '¡Hola Mundo!', '你好，世界！', 'Bonjour le monde!', 'Привет мир!', 'Hello Wêreld!'];
@@ -27,9 +26,7 @@ function addRandomGreeting() {
   greetingContainer.innerText = greeting;
 }
 
-/**
- * Changes color of the ONLY the main header on the page.
- */
+/** Changes color of the ONLY the main header on the page. */
 function applyColor() {
     const colors =
       ['red', 'green', 'blue', 'yellow', 'black', 'purple', 'orange', 'pink', 'gray', 'aqua', 'tomato', 'teal'];
@@ -41,9 +38,7 @@ function applyColor() {
     document.getElementById("header").style.color = color;
 }
 
-/**
- * Async Function that fetches the data URL mapped by the server and prints it to console and gets the first element and prints it on form.
- */
+/** Async function that fetches the data URL mapped by the server and prints it to console and gets the first element and prints it on form. */
 async function addFoodToDOM() {
     const response = await fetch('/addToDOM');
     const data = await response.json();
@@ -52,19 +47,53 @@ async function addFoodToDOM() {
 }
 
 
-/**
- * Function that fetches the state of the todo array and appends them to unordered list todos.
- */
+/** Function that fetches the state of the todo array and appends them to unordered list todos. */
 async function updateTodos() {
-    const response = await fetch('/todo');
-    const data = await response.json();
+    // Refresh Comments
+    refreshTodos();
 
-    const todos = document.getElementById('todos'); 
+    // Grab the # of Comments
+    const todoQuantity = document.getElementById("quantity").value;
+
+    // authenticate quantity given
+    if (authenticateQuantityGiven(todoQuantity)) {
+
+        // Fetch that Quantity
+        const response = await fetch(`/todo?amount=${todoQuantity}`);
+        const data = await response.json();
+        console.log(data);
+
+        createTodos(data);
+
+    } else {
+        console.log("Error! Please enter another value!");
+    }
+}
+
+/** Create Todos */
+function createTodos(data) {
+    const TodoNode = document.getElementById('todos'); 
     for (todo of data) {
-        // create li element
+        // Create li element
         const liElement = document.createElement('li');
         liElement.innerText = todo;
 
-        todos.appendChild(liElement);
+        TodoNode.appendChild(liElement);
     }
+}
+
+/** Refresh Comments */ 
+function refreshTodos() {
+    const TodoNode = document.getElementById('todos');
+    while (TodoNode.firstChild) {
+        TodoNode.removeChild(TodoNode.firstChild);
+    }
+}
+
+function authenticateQuantityGiven(todoQuantity) {
+    // set max here
+    if (todoQuantity > 0 && todoQuantity <= 5) {
+        return true;
+    } else
+        return false;
 }
