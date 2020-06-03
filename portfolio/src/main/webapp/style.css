@@ -6,6 +6,10 @@ body {
     font-family: 'Courier New', Courier, monospace;
 }
 
+li {
+    list-style-type: circle;
+}
+
 #content {
     margin-left: auto;
     margin-right: auto;
@@ -23,7 +27,7 @@ body {
     margin: 5px;
 }
 
-.form-1 {
+.box {
     width: 300px;
     border: 2px dashed black;
     padding: 10px;

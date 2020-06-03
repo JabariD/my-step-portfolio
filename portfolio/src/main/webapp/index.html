@@ -25,22 +25,41 @@
         <p>I'm starting a programming blog and a coding YouTube channel soon. I'm going to be fully immersed in the programming world soon.</p>
 
     
-      <!-- This practices the FORM functionality to GET data from the user. -->
-
-      <div class="form-1">
+      <!-- 1) This practices the FORM functionality to GET data from the user. -->
+      <h2>Servlet 1: Basic New Page</h2>
+      <div class="box">
         Enter any text and click the button:
-        <form action="/data" method="GET">
+        <form action="/newpage" method="GET">
             <input type="text" name="text"><br><br>
             <input type="submit" value="Click Me!">
         </form>
       </div>
 
-      <!-- This uses ASYNC functionality "onclick" to get data from ther server and manually input it into the DOM. -->
+      <!-- 2) This uses ASYNC functionality "onclick" to get data from ther server and manually input it into the DOM. -->
+      <h2>Servlet 2: My Favorite Foods</h2>
       <br>
-      <input onclick="responseFromServer()" type="submit" value="Testing Async!">
-      <div id="form-response-1"></div>
+      <div class="box">
+        <input onclick="addFoodToDOM()" type="submit" value="See Food Go To The DOM!">
+        <div id="fooditems"></div>
+      </div>
       <br>
 
+      <!-- 3) POST functionality. -->
+      <h2>Servlet 3: Todos </h2>
+      <div class="box">
+        <form action="/data" method="POST">
+            <p>Input a task: </p>
+            <input type="text" name="todo" id="todo">
+            <input type="submit"/>
+        </form>
+        
+        <!-- Used to append todos to element! -->
+        <p>Todos:</p>
+        <ul id="todos"></ul>
+      </div>
+
+      <br>
+      <br>
 
       <!-- This is just practice using different tags. -->
       <ul class="list-box-model-test"> 
@@ -53,6 +72,7 @@
           <li>And hopefully many more to come...</li>
       </ul>
 
+      <!--  Beginner Tutorial. -->
       <p>Click here to get a random 'Hello World' message:</p>
       <button onclick="addRandomGreeting()">Hello</button>
       <div id="greeting-container">    
@@ -64,18 +84,7 @@
       <img src="./images/deno.png" alt="Deno logo">
 
       <hr>
-
-      <!-- POST functionality. -->
-      <form action="/data" method="POST">
-        <p>Input a task: </p>
-        <input type="text" name="todo" id="todo">
-        <input type="submit"/>
-      </form>
-      
-      <!-- Used to append todos to element! -->
-      <p>Todos:</p>
-      <ul id="todos"></ul>
-
+      <!-- Image -->
 
       <!-- Using HTML5 tags to accurately describe and label elements. -->
       <footer class="footer">
