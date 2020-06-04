@@ -61,8 +61,6 @@ public class TodoServlet extends HttpServlet {
     /** Given user task, store it in Datastore and redirect back to HTML. */
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        // Change number of comments loaded
-        //numberOfComments = Integer.parseInt(request.getParameter("quantity"));
 
         // Add in DataStore
         String task = request.getParameter("todo");
