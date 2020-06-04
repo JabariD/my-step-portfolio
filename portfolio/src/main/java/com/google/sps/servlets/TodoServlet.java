@@ -34,29 +34,34 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 /* -------- */
 
-/** Servlet that returns some todo content. */
+/** Servlet that returns todo content. */
 @WebServlet("/todo")
 public class TodoServlet extends HttpServlet {
     private  ArrayList<String> todos = new ArrayList<String>();
+    private int numberOfComments = 3; // DEFAULT: 3
 
+    /** Load Todos from Datastore and return them to client in JSON. */
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Accepts the max number of comments
+        numberOfComments = Integer.parseInt(request.getParameter("amount"));
+
         // Get Todos from Datastore
         todos = loadTodos();
 
-        // Send JSON as the response
-        response.setContentType("application/json;");
-
-        // send Todos
+        // convert to JSON
         Gson gson = new Gson();
         String json = gson.toJson(todos);
         
         // send todos to client
+        response.setContentType("application/json;");
         response.getWriter().println(json);
     }
 
+    /** Given user task, store it in Datastore and redirect back to HTML. */
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
         // Add in DataStore
         String task = request.getParameter("todo");
         long timestamp = System.currentTimeMillis();
@@ -68,8 +73,10 @@ public class TodoServlet extends HttpServlet {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         datastore.put(taskEntity);
 
-        // Add to our todos
         todos.add(request.getParameter("todo"));
+
+        // Get Todos from Datastore
+        todos = loadTodos();
 
         // Most applications send messages using JSON
         Gson gson = new Gson();
@@ -80,6 +87,8 @@ public class TodoServlet extends HttpServlet {
         response.sendRedirect("./index.html"); // redirects to init page load JS function
     }
 
+
+    /** Extract todos from Datastore */
     public ArrayList<String> loadTodos() {
         
         // create query instance with the 'Task' kind to load it's instances
@@ -91,17 +100,21 @@ public class TodoServlet extends HttpServlet {
         // contains all the results of the KIND that you want to receive
         PreparedQuery results = datastore.prepare(query);
 
-        ArrayList<String> todo = new ArrayList<String>();
+        ArrayList<String> todoList = new ArrayList<String>();
 
         // loop through the entities and put them in todos.
+        int counter = 0;
         for (Entity entity : results.asIterable()) {
+            if (counter == numberOfComments) break;
+            ++counter;
+
             long id = entity.getKey().getId();
             String task = (String) entity.getProperty("task");
             long timestamp = (long) entity.getProperty("timestamp");
 
-            todo.add(task);
+            todoList.add(task);
         }
 
-        return todo;
+        return todoList;
     }
 }
