@@ -14,6 +14,7 @@
 
 package com.google.sps.servlets;
 
+import com.google.sps.data.Task;
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -37,7 +38,7 @@ import com.google.appengine.api.datastore.Query.SortDirection;
 /** Servlet that returns todo content. */
 @WebServlet("/todo")
 public class TodoServlet extends HttpServlet {
-    private  ArrayList<String> todos = new ArrayList<String>();
+    private  ArrayList<Task> todos = new ArrayList<Task>();
     private int numberOfComments = 3; // DEFAULT: 3
 
     /** Load Todos from Datastore and return them to client in JSON. */
@@ -73,9 +74,7 @@ public class TodoServlet extends HttpServlet {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         datastore.put(taskEntity);
 
-        todos.add(request.getParameter("todo"));
-
-        // Get Todos from Datastore
+        // Reload Todos from Datastore
         todos = loadTodos();
 
         // Most applications send messages using JSON
@@ -84,12 +83,12 @@ public class TodoServlet extends HttpServlet {
 
         response.setContentType("application/json;");
         response.getWriter().println(json);
+
         response.sendRedirect("./index.html"); // redirects to init page load JS function
     }
 
-
     /** Extract todos from Datastore */
-    public ArrayList<String> loadTodos() {
+    private ArrayList<Task> loadTodos() {
         
         // create query instance with the 'Task' kind to load it's instances
         /* NOTE: that addSort is a function that automatically sorts based on the property */
@@ -100,9 +99,9 @@ public class TodoServlet extends HttpServlet {
         // contains all the results of the KIND that you want to receive
         PreparedQuery results = datastore.prepare(query);
 
-        ArrayList<String> todoList = new ArrayList<String>();
+        ArrayList<Task> todoList = new ArrayList<Task>();
 
-        // loop through the entities and put them in todos.
+        // loop through the entities and put them in our todoList to be ready to be sent to the server .
         int counter = 0;
         for (Entity entity : results.asIterable()) {
             if (counter == numberOfComments) break;
@@ -110,9 +109,10 @@ public class TodoServlet extends HttpServlet {
 
             long id = entity.getKey().getId();
             String task = (String) entity.getProperty("task");
-            long timestamp = (long) entity.getProperty("timestamp");
 
-            todoList.add(task);
+            Task item = new Task(task, id);
+
+            todoList.add(item);
         }
 
         return todoList;

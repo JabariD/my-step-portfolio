@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 /** Function that fetches the state of the todo array and appends them to unordered list todos. */
 async function updateTodos() {
-    // Refresh Comments
-    refreshTodos();
+    // Refresh todos by deleting
+    await refreshTodos();
 
-    // Grab the # of Comments
+    // Grab the # of Todos
     const todoQuantity = document.getElementById("quantity").value;
 
     // authenticate quantity given
@@ -26,13 +27,13 @@ async function updateTodos() {
         // Fetch that Quantity
         const response = await fetch(`/todo?amount=${todoQuantity}`);
         const data = await response.json();
-        console.log(data);
 
-        createTodos(data);
+        await createTodos(data);
 
     } else {
         console.log("Error! Please enter another value!");
     }
+
 }
 
 /** Create Todos */
@@ -41,7 +42,19 @@ function createTodos(data) {
     for (todo of data) {
         // Create li element
         const liElement = document.createElement('li');
-        liElement.innerText = todo;
+        liElement.innerText = todo.task;
+        
+        // Create Delete Button
+        const spanElement = document.createElement('span');
+
+        const buttonElement = document.createElement('button');
+        buttonElement.innerHTML = "X";
+        buttonElement.id = todo.key;
+        buttonElement.setAttribute("onclick", `removeThisTodo(event)`);
+        
+
+        spanElement.appendChild(buttonElement);
+        liElement.appendChild(spanElement);
 
         TodoNode.appendChild(liElement);
     }
@@ -72,7 +85,7 @@ async function deleteTodos() {
         // Adding method type 
         method: "POST", 
       
-        // Adding body or contents to send ** Not necessary for this but for practice?
+        // Adding body or contents to send ** Not necessary for this but for practice
         body: JSON.stringify({ 
             title: "foo", 
             body: "bar", 
@@ -86,5 +99,15 @@ async function deleteTodos() {
     }) 
 
     // Re-Update Todos
+    await updateTodos();
+}
+
+async function removeThisTodo(event) {
+    const key = event.target.id;
+
+    // Remove From Datastore
+    const response = await fetch(`/delete-one-todo?id=${key}`);
+
+    // Update todos again
     await updateTodos();
 }
