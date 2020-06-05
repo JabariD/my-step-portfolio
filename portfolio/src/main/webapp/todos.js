@@ -21,11 +21,14 @@ async function updateTodos() {
     // Grab the # of Todos
     const todoQuantity = document.getElementById("quantity").value;
 
+    // Grab sort direction
+    const sortDirection = document.getElementById("SortDirection").value;
+
     // authenticate quantity given
     if (authenticateQuantityGiven(todoQuantity)) {
 
         // Fetch that Quantity
-        const response = await fetch(`/todo?amount=${todoQuantity}`);
+        const response = await fetch(`/todo?amount=${todoQuantity}&sort=${sortDirection}`);
         const data = await response.json();
 
         await createTodos(data);
@@ -98,15 +101,15 @@ async function deleteTodos() {
         } 
     }) 
 
-    // Re-Update Todos
-    await updateTodos();
+    // Clear UL child by deleting all the Todos we are showing
+    await refreshTodos();
 }
 
 async function removeThisTodo(event) {
     const key = event.target.id;
 
     // Remove From Datastore
-    const response = await fetch(`/delete-one-todo?id=${key}`);
+    await fetch(`/delete-one-todo?id=${key}`);
 
     // Update todos again
     await updateTodos();

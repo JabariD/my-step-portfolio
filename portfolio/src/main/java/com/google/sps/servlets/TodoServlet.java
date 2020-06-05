@@ -47,8 +47,11 @@ public class TodoServlet extends HttpServlet {
         // Accepts the max number of comments
         numberOfComments = Integer.parseInt(request.getParameter("amount"));
 
+        // Accept Sort Direction
+        String sortDirection = request.getParameter("sort");
+
         // Get Todos from Datastore
-        todos = loadTodos();
+        todos = loadTodos(sortDirection);
 
         // convert to JSON
         Gson gson = new Gson();
@@ -74,8 +77,11 @@ public class TodoServlet extends HttpServlet {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         datastore.put(taskEntity);
 
+        // Grab Sort Direction from HTML Form
+        String sortDirection = request.getParameter("SortDirection");
+
         // Reload Todos from Datastore
-        todos = loadTodos();
+        todos = loadTodos(sortDirection);
 
         // Most applications send messages using JSON
         Gson gson = new Gson();
@@ -88,11 +94,13 @@ public class TodoServlet extends HttpServlet {
     }
 
     /** Extract todos from Datastore */
-    private ArrayList<Task> loadTodos() {
+    private ArrayList<Task> loadTodos(String sortDirection) {
+        // Change Search Direction based on user input
+        Query.SortDirection SortChoice = sortDirection.equals("newest") ? Query.SortDirection.DESCENDING : Query.SortDirection.ASCENDING;
         
         // create query instance with the 'Task' kind to load it's instances
         /* NOTE: that addSort is a function that automatically sorts based on the property */
-        Query query = new Query("Task").addSort("timestamp", SortDirection.DESCENDING);
+        Query query = new Query("Task").addSort("timestamp", SortChoice);
 
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
