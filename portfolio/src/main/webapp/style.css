@@ -6,6 +6,10 @@ body {
     font-family: 'Courier New', Courier, monospace;
 }
 
+.auth {
+    float: right;
+}
+
 li {
     list-style-type: circle;
 }

@@ -10,10 +10,20 @@
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
     <script src="todos.js"></script>
+    <script src="login.js"></script>
   </head>
 
   <!-- NOTE: Whenever body loads, we will update the STATE of our function. React would be really helpful right now :) -->
-  <body onload="updateTodos()">
+  <body onload="updateTodos(); checkIfSignedIn()">
+      
+    <!-- Authentication . -->
+      <div class="auth">
+        <span id="email">Welcome, Guest.</span>
+        <button onclick="signIn()">Sign In</button>
+        <button onclick="signOut()">Sign Out</button>
+      </div>
+    <!--  ------- -->
+
       <div id="content">
         <!-- More practice with HTML elements. -->
         <h1 id="header" onclick="applyColor()">Payton Dennis's Portfolio</h1> 
