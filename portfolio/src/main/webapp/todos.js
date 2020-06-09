@@ -18,8 +18,10 @@ async function updateTodos() {
     // Refresh todos by deleting
     await refreshTodos();
 
-    // Grab the # of Todos
-    const todoQuantity = document.getElementById("quantity").value;
+    // Grab the # of Todos and set them
+    const todoQuantityResponse = await fetch("/todo-quantity");
+    const todoQuantity = await todoQuantityResponse.json();
+    document.getElementById("quantity").value = todoQuantity;
 
     // Grab sort direction
     const sortDirection = document.getElementById("SortDirection").value;
@@ -36,8 +38,35 @@ async function updateTodos() {
     } else {
         console.log("Error! Please enter another value!");
     }
-
 }
+
+/** Everytime we reload the page we want to update the value! */
+async function updateTodoQuantity() {
+    let number = document.getElementById("quantity").value;
+    if (!authenticateQuantityGiven(number)) number = 3; // DEFAULT to 3.
+
+    // Update Number of Todos
+    const response = await fetch("/todo-quantity", { 
+    
+                        // Adding method type 
+                        method: "POST", 
+      
+                        // Adding body or contents to send 
+                        body: JSON.stringify({ 
+                            quantity: number, 
+                        }), 
+      
+                        // Adding headers to the request 
+                        headers: { 
+                            "Content-type": "application/json; charset=UTF-8"
+                        } 
+    }); 
+
+    // Reload Todos
+    await updateTodos();
+}
+
+
 
 /** Create Todos */
 function createTodos(data) {

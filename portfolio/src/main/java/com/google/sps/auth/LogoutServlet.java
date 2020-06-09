@@ -26,15 +26,15 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 
-/** Log the user in. Redirect back to the main page! */
+/** Log out the user. Redirect back to the main page! */
 @WebServlet("/logout")
 public class LogoutServlet extends HttpServlet {
     private ArrayList<String> data = new ArrayList<String>();
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-            UserService userService = UserServiceFactory.getUserService();
-            if (userService.isUserLoggedIn()) {
+        UserService userService = UserServiceFactory.getUserService();
+        if (userService.isUserLoggedIn()) {
             response.setContentType("application/json");
 
             String urlToRedirectToAfterUserLogsOut = "/";
