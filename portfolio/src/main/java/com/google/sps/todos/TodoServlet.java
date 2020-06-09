@@ -13,6 +13,8 @@
 // limitations under the License.
 
 package com.google.sps.servlets;
+import javax.servlet.ServletException;
+import javax.servlet.ServletConfig;
 
 import com.google.sps.data.Task;
 import java.io.IOException;
@@ -40,6 +42,11 @@ import com.google.appengine.api.datastore.Query.SortDirection;
 public class TodoServlet extends HttpServlet {
     private  ArrayList<Task> todos = new ArrayList<Task>();
     private int numberOfComments = 3; // DEFAULT: 3
+
+    /** */
+    public void init(ServletConfig servletconfig) throws ServletException {
+        
+    }
 
     /** Load Todos from Datastore and return them to client in JSON. */
     @Override
