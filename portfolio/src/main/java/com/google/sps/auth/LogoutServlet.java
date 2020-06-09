@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 /* Additons */
 import com.google.gson.Gson;
 import java.util.ArrayList;
+import com.google.appengine.api.datastore.*;
 
 /** Log out the user. Redirect back to the main page! */
 @WebServlet("/logout")
@@ -34,18 +35,23 @@ public class LogoutServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UserService userService = UserServiceFactory.getUserService();
-        if (userService.isUserLoggedIn()) {
-            response.setContentType("application/json");
+        response.setContentType("application/json");
 
-            String urlToRedirectToAfterUserLogsOut = "/";
-            String logoutUrl = userService.createLogoutURL(urlToRedirectToAfterUserLogsOut);
+        String urlToRedirectToAfterUserLogsOut = "/";
+        String logoutUrl = userService.createLogoutURL(urlToRedirectToAfterUserLogsOut);
             
-            Gson gson = new Gson();
-            String json = gson.toJson(logoutUrl);
+        Gson gson = new Gson();
+        String json = gson.toJson(logoutUrl);
 
-            response.setContentType("application/json;");
-            response.getWriter().println(json);
-        }
-        
+        response.getWriter().println(json);
+
+        // Update isLoggedIn to false!
+        Entity user = new Entity("IsLoggedIn", "User");
+        user.setProperty("user", "false");
+
+        // Confirm this change in our datastore.
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        datastore.put(user);
+
     }
 }

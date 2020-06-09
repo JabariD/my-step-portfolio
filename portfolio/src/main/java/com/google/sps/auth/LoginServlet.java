@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 /* -------- */
+import com.google.appengine.api.datastore.*;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
@@ -35,7 +36,7 @@ public class LoginServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json");
 
-        
+        // Log the user in.        
         UserService userService = UserServiceFactory.getUserService();
 
         String urlToRedirectToAfterUserLogsIn = "/";
@@ -46,7 +47,13 @@ public class LoginServlet extends HttpServlet {
 
         response.setContentType("application/json;");
         response.getWriter().println(json);
-       
-     
+
+        // Update isLoggedIn to true!
+        Entity user = new Entity("IsLoggedIn", "User");
+        user.setProperty("user", "true");
+
+        // Put in datastore.
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        datastore.put(user);
     }
 }

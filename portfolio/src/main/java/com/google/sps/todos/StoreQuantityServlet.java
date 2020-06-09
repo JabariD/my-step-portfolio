@@ -24,7 +24,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /* Additons */
-import com.google.gson.Gson;
+import com.google.appengine.api.datastore.*;
+
+import com.google.gson.*;
+
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,18 +36,6 @@ import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 /* -------- */
 
-/* Datastore */
-// import com.google.appengine.api.datastore.DatastoreService;
-// import com.google.appengine.api.datastore.DatastoreServiceFactory;
-// import com.google.appengine.api.datastore.Entity;
-// import com.google.appengine.api.datastore.PreparedQuery;
-// import com.google.appengine.api.datastore.Query;
-// import com.google.appengine.api.datastore.Query.SortDirection;
-// import com.google.appengine.api.datastore.Key;
-// import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.*;
-
-/* -------- */
 
 /** Servlet that returns the number of todos. */
 @WebServlet("/todo-quantity")
@@ -67,7 +58,7 @@ public class StoreQuantityServlet extends HttpServlet {
             for (Entity entity : results.asIterable())
                 numberOfTodos = (Integer) entity.getProperty("num");
         } catch (Exception e) {
-            
+            System.out.println("An error occured: " + e);
         }
 
         // convert to JSON
@@ -92,11 +83,12 @@ public class StoreQuantityServlet extends HttpServlet {
         String data = buffer.toString();
        
         try {
-            numberOfTodos = Integer.parseInt(data.substring(13,14));
+            // Parse JSON string in data to get quantity.
+            JsonObject jsonObject = new JsonParser().parse(data).getAsJsonObject();
+            numberOfTodos = Integer.parseInt(jsonObject.get("quantity").getAsString());
         } catch (Exception e) {
             numberOfTodos = 3;
         }
-        // ------------------------------------- //
 
         // Put in Datastore
         Entity quan = new Entity("Quantity", "amount");

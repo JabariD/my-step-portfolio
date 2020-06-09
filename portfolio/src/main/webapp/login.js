@@ -1,14 +1,21 @@
+/** For now, we will simply store a boolean of true/false if the User is signed in. That's all we want. 
+In the future, we can expand on this by ADDING a separate user's kind that stores email, username, nickname. */
 
 /** Once we click the 'Sign In' button, we sign the user in. */
 async function signIn() {
-    // Determine if user is already logged in.
-    if (document.getElementById("email").innerHTML.localeCompare("Welcome, Guest.") === 0) {
+    
         // Try to log the user in.
-        const response = await fetch('/login');
-        const data = await response.json();
+        const signedIn =  await checkIfSignedIn();
+
+        if (!signedIn) {
+            // The user is not signed in, so sign them in!
+            const response = await fetch('/login');
+            const data = await response.json();
         
-        window.location.href = data;
-    }
+            window.location.href = data;
+        }
+
+        await checkIfSignedIn();
 }
 
 
@@ -17,15 +24,27 @@ async function checkIfSignedIn() {
     // Try to get the Email
     const response = await fetch('/user');
     const data = await response.json();
+    const signedIn = data[0];
 
-    document.getElementById("email").innerHTML = `Welcome, ${data}.`;
+    if (signedIn === "true") {
+        const email = data[1];
+        greetingMessage(true, email);
+        return true;
+    } else {
+        greetingMessage(false);
+        return false;
+    }
 }
 
-
-/** Once we click the 'Sign Out' button, we address the user. */
+/** Once we click the 'Sign Out' button, we log the user out. */
 async function signOut() {
     const response = await fetch('/logout');
-    const data = await response.json();
 
-    document.getElementById("email").innerHTML = "Welcome, Guest."
+    // Check if still signed in.
+    await checkIfSignedIn();
+}
+
+/** Update message to user */
+function greetingMessage(user, data = "Guest") {
+    document.getElementById("email").innerHTML = `Welcome, ${data}.`;
 }
