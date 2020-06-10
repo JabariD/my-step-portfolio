@@ -31,7 +31,15 @@ import com.google.appengine.api.datastore.*;
 /** Simply check if the user is signed in and return the email. */
 @WebServlet("/user")
 public class UserServlet extends HttpServlet {
-    private ArrayList<String> data = new ArrayList<String>();
+    public class UserStateFromDatabase {
+        public String email; 
+        public Boolean isLoggedIn;  
+
+        public UserStateFromDatabase(String email, Boolean isLoggedIn) {
+            this.email = email;
+            this.isLoggedIn = isLoggedIn;
+        }
+    };
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -45,12 +53,13 @@ public class UserServlet extends HttpServlet {
         try {
             // Try to see if user is logged in.
             Entity got = datastore.get(loggedInKey);
-            String loggedIn = (String) got.getProperty("user");
+            Boolean isLoggedIn = (Boolean) got.getProperty("user");
+            String email = "";
+            if (isLoggedIn)
+                email = userService.getCurrentUser().getEmail();
 
             // convert to JSON
-            ArrayList<String> user = new ArrayList<String>();
-            user.add(loggedIn);
-            user.add(userService.getCurrentUser().getEmail());
+            UserStateFromDatabase user = new UserStateFromDatabase(email, isLoggedIn);
 
             Gson gson = new Gson();
             String json = gson.toJson(user);

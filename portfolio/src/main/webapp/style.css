@@ -38,7 +38,7 @@ li {
     margin: 5px;
 }
 
-#useremail {
+#todo_created_by {
     color: white;
     opacity: 0.85;
     font-style: italic;

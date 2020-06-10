@@ -30,7 +30,6 @@ import com.google.appengine.api.datastore.*;
 /** Log out the user. Redirect back to the main page! */
 @WebServlet("/logout")
 public class LogoutServlet extends HttpServlet {
-    private ArrayList<String> data = new ArrayList<String>();
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -47,7 +46,7 @@ public class LogoutServlet extends HttpServlet {
 
         // Update isLoggedIn to false! 
         Entity user = new Entity("IsLoggedIn", "User");
-        user.setProperty("user", "false");
+        user.setProperty("user", false);
 
         // Confirm this change in our datastore.
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();

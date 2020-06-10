@@ -85,11 +85,11 @@ public class TodoServlet extends HttpServlet {
         // Try to get Email address of current user if Logged In and set it as a property for that todo.
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         try {
-            Key key = KeyFactory.createKey("IsLoggedIn", "User");
-            Entity e = datastore.get(key);
-            String isLoggedIn = (String) e.getProperty("user");
+            Key IsLoggedInKey = KeyFactory.createKey("IsLoggedIn", "User");
+            Entity e = datastore.get(IsLoggedInKey);
+            Boolean isLoggedIn = (Boolean) e.getProperty("user");
 
-            if (isLoggedIn.equals("true")) {
+            if (isLoggedIn) {
                 UserService userService = UserServiceFactory.getUserService();
                 String email = userService.getCurrentUser().getEmail();
                 taskEntity.setProperty("email", email);

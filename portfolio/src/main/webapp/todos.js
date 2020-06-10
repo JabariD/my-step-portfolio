@@ -45,6 +45,7 @@ async function updateTodos() {
 /** Everytime we reload the page we want to update the value! */
 async function updateTodoQuantity() {
     let number = document.getElementById("quantity").value;
+    
     if (!authenticateQuantityGiven(number)) number = 3; // DEFAULT to 3.
 
     // Update Number of Todos
@@ -105,12 +106,13 @@ function createTodos(data) {
 
 /** Adds email to invisible span element. */
 function addEmailToSpan(event) {
-    document.getElementById("useremail").innerHTML = event.target.id;
+    const span = document.getElementById("todo_created_by");
+    span.innerHTML = event.target.id;
 }
 
 function removeEmailFromSpan(event) {
     event.stopPropagation();
-    document.getElementById("useremail").innerHTML = " ";
+    document.getElementById("todo_created_by").innerHTML = " ";
 }
 
 /** Refresh Comments */ 
@@ -153,9 +155,14 @@ async function deleteTodos() {
 
     // Clear UL child by deleting all the Todos we are showing
     await refreshTodos();
+
+    // Sometimes if the user is over a todo and then suddenly clicks delete all, the span will stay. Let's make sure we delete that.
+    document.getElementById("todo_created_by").innerHTML = " ";
 }
 
 async function removeThisTodo(event) {
+    
+
     const key = event.target.id;
 
     // Remove From Datastore

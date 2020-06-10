@@ -24,11 +24,10 @@ async function checkIfSignedIn() {
     // Try to get the Email
     const response = await fetch('/user');
     const data = await response.json();
-    const signedIn = data[0];
+    console.log(data);
 
-    if (signedIn === "true") {
-        const email = data[1];
-        greetingMessage(true, email);
+    if (data.isLoggedIn) {
+        greetingMessage(true, data.email);
         return true;
     } else {
         greetingMessage(false);
