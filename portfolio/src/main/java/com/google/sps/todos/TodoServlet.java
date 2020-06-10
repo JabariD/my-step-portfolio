@@ -35,7 +35,14 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 /* -------- */
+
+/* Userservice */
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+/* ----------- */
 
 /** Servlet that returns todo content. */
 @WebServlet("/todo")
@@ -81,7 +88,25 @@ public class TodoServlet extends HttpServlet {
         taskEntity.setProperty("task", task);
         taskEntity.setProperty("timestamp", timestamp);
 
+        // Try to get Email address of current user if Logged In and set it as a property for that todo.
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        try {
+            Key key = KeyFactory.createKey("IsLoggedIn", "User");
+            Entity e = datastore.get(key);
+            String isLoggedIn = (String) e.getProperty("user");
+            System.out.println(isLoggedIn);
+            if (isLoggedIn.equals("true")) {
+                UserService userService = UserServiceFactory.getUserService();
+                String email = userService.getCurrentUser().getEmail();
+                taskEntity.setProperty("email", email);
+            } else {
+                taskEntity.setProperty("email", "Guest");
+            }
+        } catch (Exception e) {
+            System.out.println("Unable to determine if the user is logged in." + e);
+        }
+
+        datastore = DatastoreServiceFactory.getDatastoreService();
         datastore.put(taskEntity);
 
         // Grab Sort Direction from HTML Form

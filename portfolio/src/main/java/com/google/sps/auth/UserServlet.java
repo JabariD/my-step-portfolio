@@ -32,8 +32,6 @@ import com.google.appengine.api.datastore.*;
 @WebServlet("/user")
 public class UserServlet extends HttpServlet {
     private ArrayList<String> data = new ArrayList<String>();
-    private Boolean x = false;
-
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {

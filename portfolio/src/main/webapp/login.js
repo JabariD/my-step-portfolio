@@ -4,18 +4,17 @@ In the future, we can expand on this by ADDING a separate user's kind that store
 /** Once we click the 'Sign In' button, we sign the user in. */
 async function signIn() {
     
-        // Try to log the user in.
-        const signedIn =  await checkIfSignedIn();
+    // Try to log the user in.
+    const signedIn =  await checkIfSignedIn();
 
-        if (!signedIn) {
-            // The user is not signed in, so sign them in!
-            const response = await fetch('/login');
-            const data = await response.json();
+    if (!signedIn) {
+        // The user is not signed in, so sign them in!
+        const response = await fetch('/login');
+        const data = await response.json();
         
-            window.location.href = data;
-        }
-
-        await checkIfSignedIn();
+        window.location.href = data;
+    }
+    await checkIfSignedIn();
 }
 
 

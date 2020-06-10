@@ -45,7 +45,7 @@ public class LogoutServlet extends HttpServlet {
 
         response.getWriter().println(json);
 
-        // Update isLoggedIn to false!
+        // Update isLoggedIn to false! 
         Entity user = new Entity("IsLoggedIn", "User");
         user.setProperty("user", "false");
 
