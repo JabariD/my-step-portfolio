@@ -20,7 +20,9 @@ async function updateTodos() {
 
     // Grab the # of Todos and set them
     const todoQuantityResponse = await fetch("/todo-quantity");
+    
     const todoQuantity = await todoQuantityResponse.json();
+    
     document.getElementById("quantity").value = todoQuantity;
 
     // Grab sort direction
@@ -62,6 +64,7 @@ async function updateTodoQuantity() {
                         } 
     }); 
 
+
     // Reload Todos
     await updateTodos();
 }
@@ -70,11 +73,15 @@ async function updateTodoQuantity() {
 
 /** Create Todos */
 function createTodos(data) {
+
     const TodoNode = document.getElementById('todos'); 
     for (todo of data) {
         // Create li element
         const liElement = document.createElement('li');
+        liElement.id = todo.email;
         liElement.innerText = todo.task;
+        liElement.setAttribute("onmouseover", `addEmailToSpan(event)`);
+        liElement.setAttribute("onmouseout", "removeEmailFromSpan(event)");
         
         // Create Delete Button
         const spanElement = document.createElement('span');
@@ -82,7 +89,11 @@ function createTodos(data) {
         const buttonElement = document.createElement('button');
         buttonElement.innerHTML = "X";
         buttonElement.id = todo.key;
-        buttonElement.setAttribute("onclick", `removeThisTodo(event)`);
+        buttonElement.setAttribute("onclick", "removeThisTodo(event)");
+
+        // The button element will inherit the mouseover property from it's parent liElement.
+        // We need to prevent it from showing it's ID.
+        buttonElement.setAttribute("onmouseover", "removeEmailFromSpan(event)");
         
 
         spanElement.appendChild(buttonElement);
@@ -90,6 +101,16 @@ function createTodos(data) {
 
         TodoNode.appendChild(liElement);
     }
+}
+
+/** Adds email to invisible span element. */
+function addEmailToSpan(event) {
+    document.getElementById("useremail").innerHTML = event.target.id;
+}
+
+function removeEmailFromSpan(event) {
+    event.stopPropagation();
+    document.getElementById("useremail").innerHTML = " ";
 }
 
 /** Refresh Comments */ 

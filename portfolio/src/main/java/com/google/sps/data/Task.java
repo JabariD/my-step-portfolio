@@ -18,10 +18,12 @@ package com.google.sps.data;
 public final class Task {
 
   private final String task;
+  private final String email;
   private final long key;
 
-  public Task(String task, long key) {
+  public Task(String task, String email, long key) {
     this.task = task;
+    this.email = email;
     this.key = key;
   }
 }

@@ -50,13 +50,12 @@ public class StoreQuantityServlet extends HttpServlet {
     /** Simply get number of the numberofTodos. */
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        Key amountKey = KeyFactory.createKey("Quantity", "amount");
         try {
             // Retrieve from Datastore if avaliable.
-            Query query = new Query("Quantity");
-            PreparedQuery results = datastore.prepare(query);
-            for (Entity entity : results.asIterable())
-                numberOfTodos = (Integer) entity.getProperty("num");
+            Entity got = datastore.get(amountKey);
+            numberOfTodos = (Integer) got.getProperty("num");
         } catch (Exception e) {
             System.out.println("An error occured: " + e);
         }

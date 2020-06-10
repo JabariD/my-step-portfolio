@@ -67,13 +67,7 @@ public class TodoServlet extends HttpServlet {
         // Get Todos from Datastore
         todos = loadTodos(sortDirection);
 
-        // convert to JSON
-        Gson gson = new Gson();
-        String json = gson.toJson(todos);
-        
-        // send todos to client
-        response.setContentType("application/json;");
-        response.getWriter().println(json);
+        sendTodosToClient(response, todos);
     }
 
     /** Given user task, store it in Datastore and redirect back to HTML. */
@@ -94,7 +88,7 @@ public class TodoServlet extends HttpServlet {
             Key key = KeyFactory.createKey("IsLoggedIn", "User");
             Entity e = datastore.get(key);
             String isLoggedIn = (String) e.getProperty("user");
-            System.out.println(isLoggedIn);
+
             if (isLoggedIn.equals("true")) {
                 UserService userService = UserServiceFactory.getUserService();
                 String email = userService.getCurrentUser().getEmail();
@@ -115,12 +109,9 @@ public class TodoServlet extends HttpServlet {
         // Reload Todos from Datastore
         todos = loadTodos(sortDirection);
 
-        // Most applications send messages using JSON
-        Gson gson = new Gson();
-        String json = gson.toJson(todos);
 
-        response.setContentType("application/json;");
-        response.getWriter().println(json);
+        sendTodosToClient(response, todos);
+        
 
         response.sendRedirect("./index.html"); // redirects to init page load JS function
     }
@@ -149,12 +140,26 @@ public class TodoServlet extends HttpServlet {
 
             long id = entity.getKey().getId();
             String task = (String) entity.getProperty("task");
+            String email = (String) entity.getProperty("email");
 
-            Task item = new Task(task, id);
+            Task item = new Task(task, email, id);
 
             todoList.add(item);
         }
 
         return todoList;
+    }
+
+
+    private void sendTodosToClient(HttpServletResponse response, ArrayList<Task> todoList) {
+        Gson gson = new Gson();
+        String json = gson.toJson(todoList);
+
+        response.setContentType("application/json;");
+        try {
+            response.getWriter().println(json);
+        } catch (Exception e) {
+            System.out.println("Error trying to send todos to client" + e);
+        }
     }
 }

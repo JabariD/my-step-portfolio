@@ -11,6 +11,7 @@ async function signIn() {
         // The user is not signed in, so sign them in!
         const response = await fetch('/login');
         const data = await response.json();
+        setTimeout(500);
         
         window.location.href = data;
     }
