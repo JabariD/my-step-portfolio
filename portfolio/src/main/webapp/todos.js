@@ -71,7 +71,6 @@ async function updateTodoQuantity() {
     }); 
     
 
-
     // Reload Todos
     await updateTodos();
 }
@@ -148,87 +147,97 @@ async function deleteTodos() {
     let isLoggedIn = await checkIfNotGuest();
 
     if (!isLoggedIn) {
-        if(confirm("Please sign in to complete this action.")) {
-            document.getElementById('signIn').click();
+        const response = await fetch(`/guest-delete?oneTodo=false&key=null`);
+        const NoTodoByEmail = await response.json();
+        console.log(NoTodoByEmail);
+        if (NoTodoByEmail) {
+            if (isLoggedIn) await deleteAllTodos();
         } else {
-            return;
+
+            if ( confirm("Please sign in to complete this action.") ) document.getElementById('signIn').click();
+            else return;
         }
+
+    } else {
+        // Make sure the user is has logged in.
+        isLoggedIn = await checkIfNotGuest();
+
+        if (isLoggedIn) await deleteAllTodos();
     }
-
-    // Make sure the user is has logged in.
-    isLoggedIn = await checkIfNotGuest();
-
-    if (isLoggedIn) {
-
-
-        // POST request using fetch() to delete store in database
-        await fetch("/delete-todo", { 
         
-            // Adding method type 
-            method: "POST", 
-        
-            // Adding body or contents to send ** Not necessary for this but for practice
-            body: JSON.stringify({ 
-                title: "foo", 
-                body: "bar", 
-                userId: 1 
-            }), 
-            
-            // Adding headers to the request 
-            headers: { 
-                "Content-type": "application/json; charset=UTF-8"
-            } 
-        }) 
-
-        // Clear UL child by deleting all the Todos we are showing
-        await refreshTodos();
-
-        // Sometimes if the user is over a todo and then suddenly clicks delete all, the span will stay. Let's make sure we delete that.
-        document.getElementById("todo_created_by").innerHTML = " ";
-    }
 }
+
+async function deleteAllTodos() {
+    // POST request using fetch() to delete store in database
+    await fetch("/delete-todo", { 
+
+        // Adding method type 
+        method: "POST", 
+
+        // Adding body or contents to send ** Not necessary for this but for practice
+        body: JSON.stringify({ 
+            title: "foo", 
+            body: "bar", 
+            userId: 1 
+        }), 
+    
+        // Adding headers to the request 
+        headers: { 
+            "Content-type": "application/json; charset=UTF-8"
+        }    
+    }); 
+
+    // Clear UL child by deleting all the Todos we are showing
+    await refreshTodos();
+
+    // Sometimes if the user is over a todo and then suddenly clicks delete all, the span will stay. Let's make sure we delete that.
+    document.getElementById("todo_created_by").innerHTML = " ";
+}
+
 
 async function removeThisTodo(event) {
-    // Prevent guests from deleting a todo.
+    // Guests can only delete if todo is guest.
     let isLoggedIn = await checkIfNotGuest();
+
     if (!isLoggedIn) {
-        if(confirm("Please sign in to complete this action.")) {
-            document.getElementById('signIn').click();
+        const response = await fetch(`/guest-delete?oneTodo=true&key=${event.target.id}`);
+        const todoCreatedByUser = await response.json();
+
+        // If we are trying to delete a guest todo.
+        if (todoCreatedByUser.localeCompare("Guest") === 0) {
+            const key = event.target.id;
+
+            // Remove From Datastore
+            await fetch(`/delete-one-todo?id=${key}`);
+
+            // Update todos again
+            await updateTodos();
         } else {
-            return;
+            if( confirm("Please sign in to complete this action.") ) document.getElementById('signIn').click();
+            else return;
+            }
+    } else {
+
+        // Make sure the user is has logged in.
+        isLoggedIn = await checkIfNotGuest();
+
+        if (isLoggedIn) {
+            const key = event.target.id;
+
+            // Remove From Datastore
+            await fetch(`/delete-one-todo?id=${key}`);
+
+            // Update todos again
+            await updateTodos();
         }
     }
-
-    // Make sure the user is has logged in.
-    isLoggedIn = await checkIfNotGuest();
-
-    if (isLoggedIn) {
-        const key = event.target.id;
-
-        // Remove From Datastore
-        await fetch(`/delete-one-todo?id=${key}`);
-
-        // Update todos again
-        await updateTodos();
-    }
+    
 }
 
-
-/** Making some sacrifices here...
-    I could export the functions previously but I deemed it to be to much of a headachace for this reason:
-
-    To use import/export you have to convert JS files to modules. Which limits the code in that file to ONLY that file.
-    So now, we would have to manually change and edit DOM one by one. Since HTML code doesn't recongize the JS modules.
-
-    For the sake of time, I thought it would just be worth duplicating just a tad bit of code that obviously could be reused. Let me know if you want me to change it :)!
-    Even though this function is shorter than the one in login.js
- */
-
- async function checkIfNotGuest() {
+async function checkIfNotGuest() {
     // Try to get the Email
     const response = await fetch('/user');
     const data = await response.json();
 
     return data.isLoggedIn ? true : false;
-
 }
