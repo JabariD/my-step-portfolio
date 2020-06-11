@@ -16,10 +16,15 @@
 /** Function that fetches the state of the todo array and appends them to unordered list todos. */
 async function updateTodos() {
     // Refresh todos by deleting
-    await refreshTodos();
+    refreshTodos();
 
     // Grab the # of Todos and set them
-    const todoQuantityResponse = await fetch("/todo-quantity");
+    let todoQuantityResponse;
+    try {
+        todoQuantityResponse = await fetch("/todo-quantity");
+    } catch (e) {
+        console.log(e);
+    }
     
     const todoQuantity = await todoQuantityResponse.json();
     
@@ -45,7 +50,7 @@ async function updateTodos() {
 /** Everytime we reload the page we want to update the value! */
 async function updateTodoQuantity() {
     let number = document.getElementById("quantity").value;
-    
+
     if (!authenticateQuantityGiven(number)) number = 3; // DEFAULT to 3.
 
     // Update Number of Todos
@@ -64,6 +69,7 @@ async function updateTodoQuantity() {
                             "Content-type": "application/json; charset=UTF-8"
                         } 
     }); 
+    
 
 
     // Reload Todos
@@ -79,6 +85,10 @@ function createTodos(data) {
     for (todo of data) {
         // Create li element
         const liElement = document.createElement('li');
+
+        // Check email not undefined
+        if (todo.email === undefined) todo.email = "Guest";
+
         liElement.id = todo.email;
         liElement.innerText = todo.task;
         liElement.setAttribute("onmouseover", `addEmailToSpan(event)`);
@@ -134,40 +144,91 @@ function authenticateQuantityGiven(todoQuantity) {
 
 /** Using fetch to have a POST request and RE-UPDATE todos. */ 
 async function deleteTodos() {
-    // POST request using fetch() to delete store in database
-    await fetch("/delete-todo", { 
-      
-        // Adding method type 
-        method: "POST", 
-      
-        // Adding body or contents to send ** Not necessary for this but for practice
-        body: JSON.stringify({ 
-            title: "foo", 
-            body: "bar", 
-            userId: 1 
-        }), 
+    // Prevent guests from deleting a todo.
+    let isLoggedIn = await checkIfNotGuest();
+
+    if (!isLoggedIn) {
+        if(confirm("Please sign in to complete this action.")) {
+            document.getElementById('signIn').click();
+        } else {
+            return;
+        }
+    }
+
+    // Make sure the user is has logged in.
+    isLoggedIn = await checkIfNotGuest();
+
+    if (isLoggedIn) {
+
+
+        // POST request using fetch() to delete store in database
+        await fetch("/delete-todo", { 
         
-        // Adding headers to the request 
-        headers: { 
-            "Content-type": "application/json; charset=UTF-8"
-        } 
-    }) 
+            // Adding method type 
+            method: "POST", 
+        
+            // Adding body or contents to send ** Not necessary for this but for practice
+            body: JSON.stringify({ 
+                title: "foo", 
+                body: "bar", 
+                userId: 1 
+            }), 
+            
+            // Adding headers to the request 
+            headers: { 
+                "Content-type": "application/json; charset=UTF-8"
+            } 
+        }) 
 
-    // Clear UL child by deleting all the Todos we are showing
-    await refreshTodos();
+        // Clear UL child by deleting all the Todos we are showing
+        await refreshTodos();
 
-    // Sometimes if the user is over a todo and then suddenly clicks delete all, the span will stay. Let's make sure we delete that.
-    document.getElementById("todo_created_by").innerHTML = " ";
+        // Sometimes if the user is over a todo and then suddenly clicks delete all, the span will stay. Let's make sure we delete that.
+        document.getElementById("todo_created_by").innerHTML = " ";
+    }
 }
 
 async function removeThisTodo(event) {
-    
+    // Prevent guests from deleting a todo.
+    let isLoggedIn = await checkIfNotGuest();
+    if (!isLoggedIn) {
+        if(confirm("Please sign in to complete this action.")) {
+            document.getElementById('signIn').click();
+        } else {
+            return;
+        }
+    }
 
-    const key = event.target.id;
+    // Make sure the user is has logged in.
+    isLoggedIn = await checkIfNotGuest();
 
-    // Remove From Datastore
-    await fetch(`/delete-one-todo?id=${key}`);
+    if (isLoggedIn) {
+        const key = event.target.id;
 
-    // Update todos again
-    await updateTodos();
+        // Remove From Datastore
+        await fetch(`/delete-one-todo?id=${key}`);
+
+        // Update todos again
+        await updateTodos();
+    }
+}
+
+
+/** Making some sacrifices here...
+    I could export the functions previously but I deemed it to be to much of a headachace for this reason:
+
+    To use import/export you have to convert JS files to modules. Which limits the code in that file to ONLY that file.
+    So now, we would have to manually change and edit DOM one by one. Since HTML code doesn't recongize the JS modules.
+
+    For the sake of time, I thought it would just be worth duplicating just a tad bit of code that obviously could be reused. Let me know if you want me to change it :)!
+    Even though this function is shorter than the one in login.js
+ */
+
+ async function checkIfNotGuest() {
+    // Try to get the Email
+    const response = await fetch('/user');
+    const data = await response.json();
+
+    return data.isLoggedIn ? true : false;
+
 }

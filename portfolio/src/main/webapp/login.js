@@ -1,5 +1,17 @@
-/** For now, we will simply store a boolean of true/false if the User is signed in. That's all we want. 
-In the future, we can expand on this by ADDING a separate user's kind that stores email, username, nickname. */
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 
 /** Once we click the 'Sign In' button, we sign the user in. */
 async function signIn() {
@@ -24,13 +36,12 @@ async function checkIfSignedIn() {
     // Try to get the Email
     const response = await fetch('/user');
     const data = await response.json();
-    console.log(data);
 
     if (data.isLoggedIn) {
-        greetingMessage(true, data.email);
+        greetingMessage(data.email);
         return true;
     } else {
-        greetingMessage(false);
+        greetingMessage();
         return false;
     }
 }
@@ -44,6 +55,6 @@ async function signOut() {
 }
 
 /** Update message to user */
-function greetingMessage(user, data = "Guest") {
+function greetingMessage(data = "Guest") {
     document.getElementById("email").innerHTML = `Welcome, ${data}.`;
 }
