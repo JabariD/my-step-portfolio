@@ -50,7 +50,7 @@ public class LoginServlet extends HttpServlet {
 
         // Update isLoggedIn to true!
         Entity user = new Entity("IsLoggedIn", "User");
-        user.setProperty("user", "true");
+        user.setProperty("user", true);
 
         // Put in datastore.
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();

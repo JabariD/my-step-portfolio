@@ -35,7 +35,14 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 /* -------- */
+
+/* Userservice */
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+/* ----------- */
 
 /** Servlet that returns todo content. */
 @WebServlet("/todo")
@@ -60,13 +67,7 @@ public class TodoServlet extends HttpServlet {
         // Get Todos from Datastore
         todos = loadTodos(sortDirection);
 
-        // convert to JSON
-        Gson gson = new Gson();
-        String json = gson.toJson(todos);
-        
-        // send todos to client
-        response.setContentType("application/json;");
-        response.getWriter().println(json);
+        sendTodosToClient(response, todos);
     }
 
     /** Given user task, store it in Datastore and redirect back to HTML. */
@@ -81,7 +82,25 @@ public class TodoServlet extends HttpServlet {
         taskEntity.setProperty("task", task);
         taskEntity.setProperty("timestamp", timestamp);
 
+        // Try to get Email address of current user if Logged In and set it as a property for that todo.
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        try {
+            Key IsLoggedInKey = KeyFactory.createKey("IsLoggedIn", "User");
+            Entity e = datastore.get(IsLoggedInKey);
+            Boolean isLoggedIn = (Boolean) e.getProperty("user");
+
+            if (isLoggedIn) {
+                UserService userService = UserServiceFactory.getUserService();
+                String email = userService.getCurrentUser().getEmail();
+                taskEntity.setProperty("email", email);
+            } else {
+                taskEntity.setProperty("email", "Guest");
+            }
+        } catch (Exception e) {
+            System.out.println("Unable to determine if the user is logged in." + e);
+        }
+
+        datastore = DatastoreServiceFactory.getDatastoreService();
         datastore.put(taskEntity);
 
         // Grab Sort Direction from HTML Form
@@ -90,12 +109,9 @@ public class TodoServlet extends HttpServlet {
         // Reload Todos from Datastore
         todos = loadTodos(sortDirection);
 
-        // Most applications send messages using JSON
-        Gson gson = new Gson();
-        String json = gson.toJson(todos);
 
-        response.setContentType("application/json;");
-        response.getWriter().println(json);
+        sendTodosToClient(response, todos);
+        
 
         response.sendRedirect("./index.html"); // redirects to init page load JS function
     }
@@ -124,12 +140,26 @@ public class TodoServlet extends HttpServlet {
 
             long id = entity.getKey().getId();
             String task = (String) entity.getProperty("task");
+            String email = (String) entity.getProperty("email");
 
-            Task item = new Task(task, id);
+            Task item = new Task(task, email, id);
 
             todoList.add(item);
         }
 
         return todoList;
+    }
+
+
+    private void sendTodosToClient(HttpServletResponse response, ArrayList<Task> todoList) {
+        Gson gson = new Gson();
+        String json = gson.toJson(todoList);
+
+        response.setContentType("application/json;");
+        try {
+            response.getWriter().println(json);
+        } catch (Exception e) {
+            System.out.println("Error trying to send todos to client" + e);
+        }
     }
 }

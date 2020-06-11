@@ -20,7 +20,9 @@ async function updateTodos() {
 
     // Grab the # of Todos and set them
     const todoQuantityResponse = await fetch("/todo-quantity");
+    
     const todoQuantity = await todoQuantityResponse.json();
+    
     document.getElementById("quantity").value = todoQuantity;
 
     // Grab sort direction
@@ -43,6 +45,7 @@ async function updateTodos() {
 /** Everytime we reload the page we want to update the value! */
 async function updateTodoQuantity() {
     let number = document.getElementById("quantity").value;
+    
     if (!authenticateQuantityGiven(number)) number = 3; // DEFAULT to 3.
 
     // Update Number of Todos
@@ -62,6 +65,7 @@ async function updateTodoQuantity() {
                         } 
     }); 
 
+
     // Reload Todos
     await updateTodos();
 }
@@ -70,11 +74,15 @@ async function updateTodoQuantity() {
 
 /** Create Todos */
 function createTodos(data) {
+
     const TodoNode = document.getElementById('todos'); 
     for (todo of data) {
         // Create li element
         const liElement = document.createElement('li');
+        liElement.id = todo.email;
         liElement.innerText = todo.task;
+        liElement.setAttribute("onmouseover", `addEmailToSpan(event)`);
+        liElement.setAttribute("onmouseout", "removeEmailFromSpan(event)");
         
         // Create Delete Button
         const spanElement = document.createElement('span');
@@ -82,7 +90,11 @@ function createTodos(data) {
         const buttonElement = document.createElement('button');
         buttonElement.innerHTML = "X";
         buttonElement.id = todo.key;
-        buttonElement.setAttribute("onclick", `removeThisTodo(event)`);
+        buttonElement.setAttribute("onclick", "removeThisTodo(event)");
+
+        // The button element will inherit the mouseover property from it's parent liElement.
+        // We need to prevent it from showing it's ID.
+        buttonElement.setAttribute("onmouseover", "removeEmailFromSpan(event)");
         
 
         spanElement.appendChild(buttonElement);
@@ -90,6 +102,17 @@ function createTodos(data) {
 
         TodoNode.appendChild(liElement);
     }
+}
+
+/** Adds email to invisible span element. */
+function addEmailToSpan(event) {
+    const span = document.getElementById("todo_created_by");
+    span.innerHTML = event.target.id;
+}
+
+function removeEmailFromSpan(event) {
+    event.stopPropagation();
+    document.getElementById("todo_created_by").innerHTML = " ";
 }
 
 /** Refresh Comments */ 
@@ -132,9 +155,14 @@ async function deleteTodos() {
 
     // Clear UL child by deleting all the Todos we are showing
     await refreshTodos();
+
+    // Sometimes if the user is over a todo and then suddenly clicks delete all, the span will stay. Let's make sure we delete that.
+    document.getElementById("todo_created_by").innerHTML = " ";
 }
 
 async function removeThisTodo(event) {
+    
+
     const key = event.target.id;
 
     // Remove From Datastore
