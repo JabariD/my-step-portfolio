@@ -16,10 +16,15 @@
 /** Function that fetches the state of the todo array and appends them to unordered list todos. */
 async function updateTodos() {
     // Refresh todos by deleting
-    await refreshTodos();
+    refreshTodos();
 
     // Grab the # of Todos and set them
-    const todoQuantityResponse = await fetch("/todo-quantity");
+    let todoQuantityResponse;
+    try {
+        todoQuantityResponse = await fetch("/todo-quantity");
+    } catch (e) {
+        console.log(e);
+    }
     
     const todoQuantity = await todoQuantityResponse.json();
     
@@ -45,7 +50,7 @@ async function updateTodos() {
 /** Everytime we reload the page we want to update the value! */
 async function updateTodoQuantity() {
     let number = document.getElementById("quantity").value;
-    
+
     if (!authenticateQuantityGiven(number)) number = 3; // DEFAULT to 3.
 
     // Update Number of Todos
@@ -64,7 +69,7 @@ async function updateTodoQuantity() {
                             "Content-type": "application/json; charset=UTF-8"
                         } 
     }); 
-
+    
 
     // Reload Todos
     await updateTodos();
@@ -79,6 +84,10 @@ function createTodos(data) {
     for (todo of data) {
         // Create li element
         const liElement = document.createElement('li');
+
+        // Check email not undefined
+        if (todo.email === undefined) todo.email = "Guest";
+
         liElement.id = todo.email;
         liElement.innerText = todo.task;
         liElement.setAttribute("onmouseover", `addEmailToSpan(event)`);
@@ -134,24 +143,44 @@ function authenticateQuantityGiven(todoQuantity) {
 
 /** Using fetch to have a POST request and RE-UPDATE todos. */ 
 async function deleteTodos() {
+    // Prevent guests from deleting a todo.
+    let isLoggedIn = await checkifLoggedIn();
+
+    if (!isLoggedIn) {
+        const response = await fetch(`/guest-delete?oneTodo=false&key=null`);
+        const TodoByEmail = await response.json();
+        
+        // Cast to boolean and check if no todos.
+        const boolTodoByEmail = (TodoByEmail === 'true');
+        if (!boolTodoByEmail) await deleteAllTodos();
+        else 
+            if ( confirm("Please sign in to complete this action.") ) document.getElementById('signIn').click();
+    } else 
+        await deleteAllTodos();
+    
+    
+        
+}
+
+async function deleteAllTodos() {
     // POST request using fetch() to delete store in database
     await fetch("/delete-todo", { 
-      
+
         // Adding method type 
         method: "POST", 
-      
+
         // Adding body or contents to send ** Not necessary for this but for practice
         body: JSON.stringify({ 
             title: "foo", 
             body: "bar", 
             userId: 1 
         }), 
-        
+    
         // Adding headers to the request 
         headers: { 
             "Content-type": "application/json; charset=UTF-8"
-        } 
-    }) 
+        }    
+    }); 
 
     // Clear UL child by deleting all the Todos we are showing
     await refreshTodos();
@@ -160,14 +189,49 @@ async function deleteTodos() {
     document.getElementById("todo_created_by").innerHTML = " ";
 }
 
+
 async function removeThisTodo(event) {
+    // Guests can only delete if todo is guest.
+    let isLoggedIn = await checkifLoggedIn();
+
+    if (!isLoggedIn) {
+        const response = await fetch(`/guest-delete?oneTodo=true&key=${event.target.id}`);
+        const todoCreatedByUser = await response.json();
+
+        // If we are trying to delete a guest todo.
+        if (todoCreatedByUser.localeCompare("Guest") === 0) {
+            const key = event.target.id;
+
+            // Remove From Datastore
+            await fetch(`/delete-one-todo?id=${key}`);
+
+            // Update todos again
+            await updateTodos();
+        } else 
+            if ( confirm("Please sign in to complete this action.") ) document.getElementById('signIn').click();
+            
+    } 
+
+    // Make sure the user is has logged in.
+    isLoggedIn = await checkifLoggedIn();
+
+    if (isLoggedIn) {
+        const key = event.target.id;
+
+        // Remove From Datastore
+        await fetch(`/delete-one-todo?id=${key}`);
+
+        // Update todos again
+        await updateTodos();
+    }
+
     
+}
 
-    const key = event.target.id;
+async function checkifLoggedIn() {
+    // Try to get the Email
+    const response = await fetch('/user');
+    const data = await response.json();
 
-    // Remove From Datastore
-    await fetch(`/delete-one-todo?id=${key}`);
-
-    // Update todos again
-    await updateTodos();
+    return data.isLoggedIn ? true : false;
 }
