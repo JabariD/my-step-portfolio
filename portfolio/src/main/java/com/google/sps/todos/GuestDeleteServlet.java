@@ -32,6 +32,7 @@ import com.google.appengine.api.datastore.*;
 @WebServlet("/guest-delete")
 public class GuestDeleteServlet extends HttpServlet {
 
+    /** Used when the user is a Guest and would like to delete either one todo using the button or multiple todos.  */
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UserService userService = UserServiceFactory.getUserService();
@@ -39,10 +40,11 @@ public class GuestDeleteServlet extends HttpServlet {
 
         Boolean deleteOneTodo = Boolean.valueOf(request.getParameter("oneTodo"));
 
-        // User wants to try and remove 1 todo.
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+        // User wants to try and remove 1 todo. We determine who the todo was made by and return that to the client.
         if (deleteOneTodo) {
             long todoID = Long.parseLong(request.getParameter("key"));
-            DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
             Key todoKey = KeyFactory.createKey("Task", todoID);
             try {
                 Entity got = datastore.get(todoKey);
@@ -55,9 +57,7 @@ public class GuestDeleteServlet extends HttpServlet {
 
            
         } else {
-            // User wants to try and remove all todos. Loop through todos and find if a email is not guest
-            DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-
+            // User wants to try and remove all todos. Loop through todos and find if a email is not guest.
             final Query q = new Query("Task");
             PreparedQuery todosInStore = datastore.prepare(q);
 
@@ -81,9 +81,9 @@ public class GuestDeleteServlet extends HttpServlet {
         
     }
 
-    private void sendTodosToClient(HttpServletResponse response, String user) {
+    private void sendTodosToClient(HttpServletResponse response, String objectToBeSent) {
         Gson gson = new Gson();
-        String json = gson.toJson(user);
+        String json = gson.toJson(objectToBeSent);
 
         response.setContentType("application/json;");
         try {
