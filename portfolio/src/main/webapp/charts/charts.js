@@ -14,7 +14,9 @@
 
 // Currently keeping track of:
 // Countries: global, usa, china, india, brazil, mexico, russia, france, spain, pakistan
-// Characteristics: New Confirmed, Total Confirmed, NewDeaths, TotalDeaths
+// Characteristics: New Confirmed, Total Confirmed, NewDeaths, TotalDeaths 
+
+// NOTE: A summary of new and total cases per country updated daily. 
 
 async function getData() {
     try {
@@ -26,11 +28,10 @@ async function getData() {
         let array = [];
 
         // Push key
-        const key = ['ID', 'New Confirmed Cases', 'New Deaths', 'Total Confirmed', 'Total Deaths'];
+        const key = ['ID', 'New Confirmed Cases Per Day', 'New Deaths Per Day', 'Total Confirmed Cases', 'Total Deaths'];
         array.push(key);
 
         // Countries we're getting data from! These refer to the country codes based on the API.
-        // After 26 added random countries
         const CountriesIndex = [177, 35, 76, 23, 109, 138, 59, 156, 126, 93, 176];
 
         CountriesIndex.map(index => {
@@ -61,8 +62,8 @@ function loadDataToChart(array, date) {
 
         const options = {
             title: 'Most populous countries COVID-19 statistics. The current date is: ' + date,
-            hAxis: {title: 'New Confirmed Cases'},
-            vAxis: {title: 'New Deaths'},
+            hAxis: {title: 'New Confirmed Cases Per Day'},
+            vAxis: {title: 'New Deaths Per Day'},
             bubble: {textStyle: {fontSize: 11}}      
         };
 
