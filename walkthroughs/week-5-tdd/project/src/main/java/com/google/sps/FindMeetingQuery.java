@@ -30,43 +30,40 @@ public final class FindMeetingQuery {
 
     // Convert Collection to ArrayList
     ArrayList<Event> listOfEvents = new ArrayList<Event>(events);
+
+
+    //  Check if we have no attendees. If we have just 1 person attending any event from any part of the day, then we can return the whole day.
+    if (checkNoMandatoryAttendees(request, listOfEvents)) return Arrays.asList(TimeRange.WHOLE_DAY);
+
+    // Compress events of ALL GUEST AND MANDATORY people.
+    ArrayList<TimeRange> eventsGuestMandatory = compressEvents(listOfEvents);
+  
+    // Get possible ranges of Guest and Mandatory
+    ArrayList<TimeRange> possibleRanges = getPossibleRanges(eventsGuestMandatory);
+
+    // Check to make sure event duration can fit.
+    if (durationFitInDay(request, eventsGuestMandatory)) return Arrays.asList();
+
+
+    // Check if any guest overlaps with our possibleRanges
+    ArrayList<String> optionalEventAttendees = new ArrayList<String>(request.getOptionalAttendees());
+    Boolean optionalGuestOverlap = checkIfGuestOverlap(listOfEvents, optionalEventAttendees, possibleRanges);
     
-    //  Check if we have no attendees. If we have just 1 person attending any event from any part of the day, then we cannot return the whole day.
-    ArrayList<String> requestedEventAttendees = new ArrayList<String>(request.getAttendees());
+    // Return ranges if no overlap.
+    if (!optionalGuestOverlap) return possibleRanges;
 
-    Boolean noMatchingAttendeesForRequestedEvent = true;
 
-    for (int i = 0; i < listOfEvents.size(); i++) {
-      Set<String> eventAttendees = listOfEvents.get(i).getAttendees();
-
-      for (String nameInEvent : eventAttendees) {
-        for (String nameInRequestedEvent : requestedEventAttendees) {
-          if (nameInEvent == nameInRequestedEvent) {
-            noMatchingAttendeesForRequestedEvent = false;
-            break;
-          }
-        }
-        // Bubble answer up
-        if (!noMatchingAttendeesForRequestedEvent) break;
-      }
-      // Bubble answer up
-      if (!noMatchingAttendeesForRequestedEvent) break;
-    }
-
-    // If the meeting requested has no members from any other meetings during the day then that meeting can occur any day.
-    if (noMatchingAttendeesForRequestedEvent) return Arrays.asList(TimeRange.WHOLE_DAY);
+    // Remove all list of events that have optional people.
+    ArrayList<String> requestedEventOptionalAttendees = new ArrayList<String>(request.getOptionalAttendees()); 
+    listOfEvents = removeEventsOfOptionalAttendees(requestedEventOptionalAttendees, listOfEvents);
 
 
     // Compress Events 
     ArrayList<TimeRange> eventsRange = compressEvents(listOfEvents);
 
     // Check to make sure event duration can fit.
-    int currentEventMeetingDuration = 0;
-    for (int i = 0; i < eventsRange.size(); i++) {
-      currentEventMeetingDuration += eventsRange.get(i).end() -  eventsRange.get(i).start();
-    }
-  
-    if (request.getDuration() + currentEventMeetingDuration > TimeRange.WHOLE_DAY.duration()) return Arrays.asList();
+    if (durationFitInDay(request, eventsRange)) return Arrays.asList();
+   
 
     // Get possible meeting slots
     return getPossibleRanges(eventsRange);
@@ -77,11 +74,11 @@ public final class FindMeetingQuery {
     // Loop events and combine overlapping events as part of same event
     for (int i = 0; i < listOfEvents.size(); i++) {
       // If overlap we try to extend event.
-      if (i != 0 && listOfEvents.get(i).getWhen().overlaps(listOfEvents.get(i - 1).getWhen())) {
+      if ((i != 0 && listOfEvents.get(i).getWhen().overlaps(listOfEvents.get(i - 1).getWhen())) || (i != 0 && listOfEvents.get(i).getWhen().start() == eventsRange.get(eventsRange.size() - 1).end())) {
         int overlappingEventEndTime = listOfEvents.get(i).getWhen().end();
 
-        int previousEventStartTime = listOfEvents.get(i - 1).getWhen().start();
-        int previousEventEndTime = listOfEvents.get(i - 1).getWhen().end();
+        int previousEventStartTime = eventsRange.get(eventsRange.size() - 1).start();
+        int previousEventEndTime = eventsRange.get(eventsRange.size() - 1).end();
 
         // We are altering ONLY THE PREVIOUS event! We're simply asking the question: Can I extend this event to the right more?
         if (overlappingEventEndTime > previousEventEndTime) eventsRange.set(eventsRange.size() - 1, TimeRange.fromStartEnd(previousEventStartTime, overlappingEventEndTime, false));
@@ -118,5 +115,81 @@ public final class FindMeetingQuery {
     }
 
     return possibleRanges;
+  }
+
+  public Boolean checkNoMandatoryAttendees(MeetingRequest request, ArrayList<Event> listOfEvents) {
+    ArrayList<String> requestedEventAttendees = new ArrayList<String>(request.getAttendees()); 
+
+    Boolean noMatchingAttendeesForRequestedEvent = true;
+
+    for (int i = 0; i < listOfEvents.size(); i++) {
+      Set<String> eventAttendees = listOfEvents.get(i).getAttendees();
+
+      for (String nameInEvent : eventAttendees) {
+        for (String nameInRequestedEvent : requestedEventAttendees) {
+          if (nameInEvent == nameInRequestedEvent) {
+            noMatchingAttendeesForRequestedEvent = false;
+            break;
+          }
+        }
+        // Bubble answer up
+        if (!noMatchingAttendeesForRequestedEvent) break;
+      }
+      // Bubble answer up
+      if (!noMatchingAttendeesForRequestedEvent) break;
+    }
+
+    // If the meeting requested has no members from any other meetings during the day then that meeting can occur any day.
+    return noMatchingAttendeesForRequestedEvent;
+  }
+
+  public Boolean durationFitInDay(MeetingRequest request, ArrayList<TimeRange> eventsGuestMandatory) {
+    int currentEventMeetingDuration = 0;
+    for (int i = 0; i < eventsGuestMandatory.size(); i++) {
+      currentEventMeetingDuration += eventsGuestMandatory.get(i).end() -  eventsGuestMandatory.get(i).start();
+    }
+  
+    if (request.getDuration() + currentEventMeetingDuration > TimeRange.WHOLE_DAY.duration()) return true;
+    else return false;
+  }
+
+  public Boolean checkIfGuestOverlap(ArrayList<Event> listOfEvents, ArrayList<String> optionalEventAttendees, ArrayList<TimeRange> possibleRanges) {
+    for (int i = 0; i < listOfEvents.size(); i++) {
+      // Grab event attendees
+      Event event = listOfEvents.get(i);
+      Set<String> eventNames = event.getAttendees();
+      for (String eventName : eventNames) {
+        for (String requestedEventName : optionalEventAttendees) {
+          if (eventName == requestedEventName) {
+            for (TimeRange range : possibleRanges)
+            if (event.getWhen().overlaps(range)) return true;
+          }
+        }
+      }
+      // If that optional guest event overlaps with our requested event break and true
+    }
+    return false;
+  }
+
+  public ArrayList<Event> removeEventsOfOptionalAttendees(ArrayList<String> requestedEventOptionalAttendees, ArrayList<Event> listOfEvents) {
+    int indexShift = 0;
+    for (int i = 0; i < listOfEvents.size(); i++) {
+      Boolean foundOptionalPersonAttendingEvent = false;
+
+      // If there is any event that contains an optional person from the Meeting Request then delete it from listOfEvents 
+      Set<String> eventAttendees = listOfEvents.get(i).getAttendees();
+      for (String nameInEvent : eventAttendees) {
+        for (String optionalNameInEvent : requestedEventOptionalAttendees) {
+          if (nameInEvent == optionalNameInEvent) {
+            listOfEvents.remove(i - indexShift);
+            foundOptionalPersonAttendingEvent = true;
+            indexShift++;
+          }
+
+          if (foundOptionalPersonAttendingEvent) break;
+        }
+      }
+    }
+    return listOfEvents;
   }
 }
