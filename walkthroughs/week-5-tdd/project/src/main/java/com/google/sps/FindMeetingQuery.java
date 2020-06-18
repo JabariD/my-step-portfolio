@@ -41,32 +41,31 @@ public final class FindMeetingQuery {
     // Get possible ranges of Guest and Mandatory
     ArrayList<TimeRange> possibleRanges = getPossibleRanges(eventsGuestMandatory);
 
-    // Check to make sure event duration can fit.
-    if (durationFitInDay(request, eventsGuestMandatory)) return Arrays.asList();
-
+    // Check to make sure event duration can fit. 1) Not greater than length of day OR 2) By available event space.
+    Boolean nullifyGuestEvent = cantFitDurationInPossibleRange(request, possibleRanges);
+    if (cantFitDurationInDay(request, eventsGuestMandatory) && !nullifyGuestEvent) return Arrays.asList();
 
     // Check if any guest overlaps with our possibleRanges
     ArrayList<String> optionalEventAttendees = new ArrayList<String>(request.getOptionalAttendees());
     Boolean optionalGuestOverlap = checkIfGuestOverlap(listOfEvents, optionalEventAttendees, possibleRanges);
     
-    // Return ranges if no overlap.
-    if (!optionalGuestOverlap) return possibleRanges;
+    // Only return ranges if 1) no Guest event overlaps with Requested Event and 2) if event is not greater possible event spaces.
+    if (!optionalGuestOverlap && !nullifyGuestEvent) return possibleRanges;
 
+     // Remove all list of events that have optional people.
+     ArrayList<String> requestedEventOptionalAttendees = new ArrayList<String>(request.getOptionalAttendees()); 
+    
+     listOfEvents = removeEventsOfOptionalAttendees(requestedEventOptionalAttendees, listOfEvents);
+ 
+     // Compress Events 
+     ArrayList<TimeRange> eventsRange = compressEvents(listOfEvents);
+ 
+     // Check to make sure event duration can fit.
+     if (cantFitDurationInDay(request, eventsRange)) return Arrays.asList();
+ 
+     // Get possible meeting slots
+     return getPossibleRanges(eventsRange);
 
-    // Remove all list of events that have optional people.
-    ArrayList<String> requestedEventOptionalAttendees = new ArrayList<String>(request.getOptionalAttendees()); 
-    listOfEvents = removeEventsOfOptionalAttendees(requestedEventOptionalAttendees, listOfEvents);
-
-
-    // Compress Events 
-    ArrayList<TimeRange> eventsRange = compressEvents(listOfEvents);
-
-    // Check to make sure event duration can fit.
-    if (durationFitInDay(request, eventsRange)) return Arrays.asList();
-   
-
-    // Get possible meeting slots
-    return getPossibleRanges(eventsRange);
   }
 
   public ArrayList<TimeRange> compressEvents(ArrayList<Event> listOfEvents) {
@@ -143,13 +142,23 @@ public final class FindMeetingQuery {
     return noMatchingAttendeesForRequestedEvent;
   }
 
-  public Boolean durationFitInDay(MeetingRequest request, ArrayList<TimeRange> eventsGuestMandatory) {
+  public Boolean cantFitDurationInDay(MeetingRequest request, ArrayList<TimeRange> eventsGuestMandatory) {
     int currentEventMeetingDuration = 0;
     for (int i = 0; i < eventsGuestMandatory.size(); i++) {
       currentEventMeetingDuration += eventsGuestMandatory.get(i).end() -  eventsGuestMandatory.get(i).start();
     }
   
     if (request.getDuration() + currentEventMeetingDuration > TimeRange.WHOLE_DAY.duration()) return true;
+    else return false;
+  }
+
+  public Boolean cantFitDurationInPossibleRange(MeetingRequest request, ArrayList<TimeRange> possibleRange) {
+    int possibleEventMeetingDuration = 0;
+    for (int i = 0; i < possibleRange.size(); i++) {
+      possibleEventMeetingDuration += possibleRange.get(i).end() -  possibleRange.get(i).start();
+    }
+  
+    if (request.getDuration() > possibleEventMeetingDuration) return true;
     else return false;
   }
 
