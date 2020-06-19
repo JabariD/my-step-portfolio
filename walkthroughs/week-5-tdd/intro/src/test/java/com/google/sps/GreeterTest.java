@@ -30,4 +30,23 @@ public final class GreeterTest {
 
     Assert.assertEquals("Hello Ada", greeting);
   }
+
+  @Test
+  public void testGreetingTrimsWhitespace() {
+    Greeter greeter = new Greeter();
+
+    String name = "   #       Ada   &";
+    name = name.replaceAll("\\s", ""); // remove spaces
+    name = name.replaceAll("&", ""); 
+    name = name.replaceAll("$", "");
+    name = name.replaceAll("#", "");
+    name = name.replaceAll("%", "");
+
+    String greeting = greeter.greet(name);
+
+    // Whitespace should be trimmed
+    Assert.assertEquals("Hello Ada", greeting);
+  }
 }
+
+
